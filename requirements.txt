@@ -1,6 +1,5 @@
 streamlit
 plotly
 pandas
-glob
 os
 re
