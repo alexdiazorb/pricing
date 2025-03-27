@@ -225,7 +225,7 @@ else:
     filtered_by_website = processed_data
 
 # --- Main Body: Product Selection & Date Range ---
-st.markdown("## Product Search and Selection")
+st.markdown("## Search Products and Selection")
 selected_products_global = []
 if selected_websites:
     if len(selected_websites) > 1:
