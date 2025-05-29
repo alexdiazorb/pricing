@@ -186,7 +186,7 @@ def is_logged_in(driver):
         print_info("Welcome link not found - user is not logged in.")
         return False
 
-def crawl_site(driver, base_url, max_pages=5000, skip_urls=None):
+def crawl_site(driver, base_url, max_pages=10000, skip_urls=None):
     excluded_patterns = [
         "https://www.wsdisplay.com/cart",
         "https://www.wsdisplay.com/webstore",

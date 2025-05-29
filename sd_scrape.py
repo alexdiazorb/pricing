@@ -81,7 +81,7 @@ def is_product_page(driver):
     except Exception:
         return False
 
-def crawl_site(driver, base_url, already_scraped=None, max_pages=5000):
+def crawl_site(driver, base_url, already_scraped=None, max_pages=10000):
     """
     Crawl the entire site starting from base_url, following only internal links.
     Skips any URL that is either in the 'already_scraped' set or matches the excluded patterns.

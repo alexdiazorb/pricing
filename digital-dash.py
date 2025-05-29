@@ -206,6 +206,43 @@ def compute_price_movements(df):
             })
     return pd.DataFrame(summary_rows)
 
+# --- Compute Price Movements (Last 7 Days) ---
+def compute_price_movements_last_week(df, days: int = 7):
+    """
+    Return products whose price changed between the start and end
+    of the most recent <days>-day window (default: 7 days).
+    """
+    if df.empty:
+        return pd.DataFrame()
+
+    recent_cutoff = datetime.today() - timedelta(days=days)
+    df_recent = df[df["collection_date"] >= recent_cutoff]
+
+    summary_rows = []
+    for (website, product), group in df_recent.groupby(["website", "product"]):
+        group_sorted = group.sort_values(by="collection_date")
+        if len(group_sorted) < 2:
+            continue  # need at least two points within the window
+        first = group_sorted.iloc[0]
+        last = group_sorted.iloc[-1]
+        first_price, last_price = first["price"], last["price"]
+
+        if pd.notnull(first_price) and pd.notnull(last_price) and first_price != last_price:
+            change = last_price - first_price
+            pct_change = (change / first_price) * 100 if first_price != 0 else None
+            summary_rows.append({
+                "Website": website,
+                "Product": product,
+                "Start Date": first["collection_date"].date(),
+                "Start Price": first_price,
+                "End Date": last["collection_date"].date(),
+                "End Price": last_price,
+                "Change": change,
+                "% Change": pct_change,
+            })
+
+    return pd.DataFrame(summary_rows)
+
 # --- Sidebar Filters ---
 st.sidebar.header("Filters")
 if not processed_data.empty:
@@ -266,9 +303,17 @@ if selected_products_global:
 else:
     filtered_data = filtered_by_website
 
+# --- Homepage: Price Changes Last 7 Days ---
+st.markdown("## Price Changes in the Last 7 Days")
+last_week_summary = compute_price_movements_last_week(filtered_by_website)
+if last_week_summary.empty:
+    st.write("No price changes detected in the past week.")
+else:
+    st.dataframe(last_week_summary)
+
 # --- Default Homepage View ---
 if not selected_products_global:
-    st.markdown("## Price Movements by Website")
+    st.markdown("## Price Movements by Website (Latest vs. Previous)")
     summary = compute_price_movements(filtered_by_website)
     if summary.empty:
         st.write("No products have moved in price from the compared period.")
